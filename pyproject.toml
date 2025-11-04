@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "cgd"
+version = "0.1.0"
+description = ""
+authors = ["aliaflore <100151385+aliaflore@users.noreply.github.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+flask = "^3.1.2"
+openai-detector = "^0.1.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

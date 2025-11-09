@@ -34,12 +34,13 @@ Our system combines **CodeBERT-based transformers** with **classical ML models**
 
 ## 🧩 Design Patterns
 - **Singleton** – configuration management  
-- **Factory Method** – dataset/code loader  
-- **Template Method** – feature extraction steps  
+- **Factory Method** – dataset/code loader
+- **Template Method** – feature extraction steps - [Florea Alexia - evaluator.py](training/evaluator.py)
 - **Strategy** – interchangeable ML models  
 - **Builder + Observer** – training progress tracking  
 - **Decorator** – extend feature extraction dynamically  
 - **Facade** – unify the end-to-end prediction pipeline  
+- **Adapter** - integrate different model APIs - [Florea Alexia - openai_detector.py](models/openai_detector.py)
 
 ---
 

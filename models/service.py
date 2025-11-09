@@ -7,6 +7,7 @@ class ModelService(ABC):
     def train(self, X, y):
         pass
 
+    # Returns a float between 0 and 1 indicating the prediction
     @abstractmethod
-    def predict(self, X):
+    def predict(self, X) -> float:
         pass

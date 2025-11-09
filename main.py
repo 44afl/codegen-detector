@@ -18,8 +18,15 @@ def hello_world():
 def predict(request: Request):
     if request.method != "POST":
         return "<p>Method Not Allowed</p>", 405
+    
+    if not request.is_json:
+        return "<p>Missing input</p>", 400
 
     sample_input = request.json.get("input", "")
+
+    if not sample_input:
+        return "<p>Missing input</p>", 400
+    
     predictions = [model.predict(sample_input) for model in models]
     logger.info(f"Predictions: {predictions}")
     avg_prediction = sum(predictions) / len(predictions)

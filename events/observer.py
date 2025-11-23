@@ -1,22 +1,63 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from typing import List, Dict, Any
+from typing import Dict, Any, List
+import json
+
+import time
+from aop.aspects import log_call, debug
+
+
+#Observer interface
 
 class ProgressObserver(ABC):
-    @abstractmethod
-    def update(self, subject: ProgressSubject, payload: Dict[str, Any]) -> None: ...
+    """Abstract Observer for progress updates."""
 
+    @abstractmethod
+    def update(self, subject: "ProgressSubject", payload: Dict[str, Any]) -> None:
+        pass
 
-class ProgressSubject(ABC):
-    @abstractmethod
-    def attach(self, observer: ProgressObserver) -> None: ...
-    @abstractmethod
-    def detach(self, observer: ProgressObserver) -> None: ...
-    @abstractmethod
-    def notify(self, payload: Dict[str, Any]) -> None: ...
+# Subject 
+
+class ProgressSubject:
+    """Concrete Subject (Trainer, Evaluator, etc.)."""
+
+    def __init__(self) -> None:
+        self._observers: List[ProgressObserver] = []
+
+    def attach(self, observer: ProgressObserver) -> None:
+        if observer not in self._observers:
+            self._observers.append(observer)
+
+    def detach(self, observer: ProgressObserver) -> None:
+        if observer in self._observers:
+            self._observers.remove(observer)
+
+    @log_call
+    @debug
+    def notify(self, payload: Dict[str, Any]) -> None:
+        for obs in self._observers:
+            obs.update(self, payload)
+
+# Concrete Observers
 
 class ConsoleProgressObserver(ProgressObserver):
-    def update(self, subject: ProgressSubject, payload: Dict[str, Any]) -> None: ...
+    """Displays progress in the console: useful when running  training."""
+
+    def update(self, subject: ProgressSubject, payload: Dict[str, Any]) -> None:
+        ts = time.strftime("%H:%M:%S")
+        msg = f"[{ts}] EVENT = {payload.get('event', 'unknown')}"
+        for k, v in payload.items():
+            if k != "event":
+                msg += f" | {k} = {v}"
+        print(msg)
+
 
 class LogProgressObserver(ProgressObserver):
-    def update(self, subject: ProgressSubject, payload: Dict[str, Any]) -> None: ...
+    """Writes progress to a JSONL file (one line = one event)."""
+
+    def __init__(self, logfile: str = "training_progress.jsonl") -> None:
+        self.logfile = logfile
+
+    def update(self, subject: ProgressSubject, payload: Dict[str, Any]) -> None:
+        with open(self.logfile, "a", encoding="utf-8") as f:
+            f.write(json.dumps(payload) + "\n")

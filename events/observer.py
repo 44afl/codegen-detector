@@ -2,7 +2,9 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Dict, Any, List
 import json
+
 import time
+from aop.aspects import log_call, debug
 
 
 #Observer interface
@@ -30,6 +32,8 @@ class ProgressSubject:
         if observer in self._observers:
             self._observers.remove(observer)
 
+    @log_call
+    @debug
     def notify(self, payload: Dict[str, Any]) -> None:
         for obs in self._observers:
             obs.update(self, payload)

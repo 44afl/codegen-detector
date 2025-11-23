@@ -1,6 +1,7 @@
 from __future__ import annotations
 from typing import Dict, Any
 from .base import FeatureExtractor
+from aop.aspects import log_call, timeit, debug
 
 class FeatureDecorator(FeatureExtractor):
     """Base: wraps an extractor and adds PRE/POST processing."""
@@ -14,22 +15,26 @@ class FeatureDecorator(FeatureExtractor):
     def _post(self, feats: Dict[str, Any], code: str, lang: str | None) -> Dict[str, Any]:
         return feats
 
+
+    @log_call   
+    @timeit
     def extract_features(self, code: str, lang: str | None = None) -> Dict[str, Any]:
-        print("\n[DEBUG DECORATOR] ORIGINAL CODE:")
-        print(repr(code))
+        # print("\n[DEBUG DECORATOR] ORIGINAL CODE:")
+        # print(repr(code))
         code2 = self._pre(code, lang)
-        print("[DEBUG DECORATOR] AFTER _pre:")
-        print(repr(code2))
+        # print("[DEBUG DECORATOR] AFTER _pre:")
+        # print(repr(code2))
         base_feats = self._extractor.extract_features(code2, lang)
-        print("[DEBUG DECORATOR] BASE FEATS ON CLEANED CODE:")
-        print(base_feats)
+        # print("[DEBUG DECORATOR] BASE FEATS ON CLEANED CODE:")
+        # print(base_feats)
         final = self._post(base_feats, code, lang)
-        print("[DEBUG DECORATOR] FINAL FEATS AFTER _post:")
-        print(final)
+        # print("[DEBUG DECORATOR] FINAL FEATS AFTER _post:")
+        # print(final)
         return final
 
 class CommentRemovalDecorator(FeatureDecorator):
     """PRE: removes single-line comments (# //) in common languages."""
+    @debug
     def _pre(self, code: str, lang: str | None) -> str:
         out = []
         for ln in code.splitlines():

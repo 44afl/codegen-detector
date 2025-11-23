@@ -1,44 +1,37 @@
-# Builder - Design Pattern
-from models.transformer import TransformerModel, ModelStrategy
-from models.svm import SVMStrategy
-from models.adaboost import AdaBoostStrategy
-from models.lstm import LSTMStrategy
+from models.service import ModelService
 from data.dataset import Dataset
 
 class Trainer:
-    def __init__(self):
-        self.model = None    
-        self.dataset = None 
-        self.model_strategy = None
-        self.results = {}
-        
+    def _init_(self):
+        self.model_strategy: ModelService | None = None
+        self.dataset: Dataset | None = None
+        self.trained_model = None
+        self.results: dict = {}
+
     def prepareData(self, dataset: Dataset):
         self.dataset = dataset
         return self
 
-    def setModel(self, model_strategy: ModelStrategy):
+    def setModel(self, model_strategy: ModelService):
         self.model_strategy = model_strategy
         return self
-        
+
     def initializeModel(self):
         if not self.model_strategy:
-            raise ValueError("Undefined model strategy")
-        self.model = self.model_strategy.build()
+            raise ValueError("Model strategy not set")
+        self.trained_model = self.model_strategy
         return self
 
     def fitModel(self):
-        if not self.model or not self.dataset:
-            raise ValueError("Undefined model or dataset")
-
-        self.results["train"] = f"{type(self.model).__name__} trained"
+        if not self.trained_model or not self.dataset:
+            raise ValueError("Missing model or dataset")
+        self.trained_model.train(self.dataset.X, self.dataset.y)
+        self.results["train_status"] = "ok"
         return self
 
     def evaluateModel(self):
-        if not self.model:
-            raise ValueError("Undefined model")
-        
-        self.results["eval"] = f"{type(self.model).__name__} evaluated"
+        self.results["eval_status"] = "not_implemented"
         return self
 
     def build(self):
-        return self
+        return self.trained_model, self.results

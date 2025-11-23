@@ -41,23 +41,18 @@ class ProgressSubject:
 # Concrete Observers
 
 class ConsoleProgressObserver(ProgressObserver):
-    """Displays progress in the console: useful when running  training."""
-
-    def update(self, subject: ProgressSubject, payload: Dict[str, Any]) -> None:
-        ts = time.strftime("%H:%M:%S")
-        msg = f"[{ts}] EVENT = {payload.get('event', 'unknown')}"
-        for k, v in payload.items():
-            if k != "event":
-                msg += f" | {k} = {v}"
-        print(msg)
+    def update(self, subject: "ProgressSubject", payload: Dict[str, Any]) -> None:
+        step = payload.get("step")
+        prog = payload.get("progress")
+        print(f"[OBS-CONSOLE] {step} -> {prog}%")
 
 
 class LogProgressObserver(ProgressObserver):
-    """Writes progress to a JSONL file (one line = one event)."""
+    def __init__(self, path: str = "training_progress.log") -> None:
+        self.path = path
 
-    def __init__(self, logfile: str = "training_progress.jsonl") -> None:
-        self.logfile = logfile
-
-    def update(self, subject: ProgressSubject, payload: Dict[str, Any]) -> None:
-        with open(self.logfile, "a", encoding="utf-8") as f:
-            f.write(json.dumps(payload) + "\n")
+    def update(self, subject: "ProgressSubject", payload: Dict[str, Any]) -> None:
+        step = payload.get("step")
+        prog = payload.get("progress")
+        with open(self.path, "a") as f:
+            f.write(f"{step},{prog}\n")

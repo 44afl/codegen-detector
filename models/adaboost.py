@@ -8,7 +8,7 @@ class AdaBoostStrategy(ModelService):
         self.model = AdaBoostClassifier(
             n_estimators=50,
             learning_rate=1.0,
-            algorithm="SAMME.R",
+        #    algorithm="SAMME",
             **kwargs
         )
 

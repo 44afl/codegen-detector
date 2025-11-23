@@ -1,3 +1,5 @@
 *.pyc
 .venv/
 venv/
+data/task_a
+__pycache__/

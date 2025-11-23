@@ -1,0 +1,8 @@
+load_data,10
+set_model,20
+init_model,40
+load_data,10
+set_model,20
+init_model,40
+fit,80
+eval,100

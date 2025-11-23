@@ -38,18 +38,7 @@ def predict(request: Request):
 
 if __name__ == "__main__":
     app.run(debug=True)
-    dataset = Dataset.from_parquet("data/task_a/task_a_training_set.parquet")
-    trainer = (
-        Trainer()
-        .prepareData(dataset)
-        .setModel(AdaBoostStrategy())
-        .initializeModel()
-        .fitModel()
-        .evaluateModel()
-    )
-
-    model, results = trainer.build()
-    print(results)
+    
 
 
 

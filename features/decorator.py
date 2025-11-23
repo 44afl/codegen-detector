@@ -3,7 +3,8 @@ from typing import Dict, Any
 from .base import FeatureExtractor
 
 class FeatureDecorator(FeatureExtractor):
-    """Baza: îmbracă un extractor și adaugă PRE/POST procesare."""
+    """Base: wraps an extractor and adds PRE/POST processing."""
+    
     def __init__(self, extractor: FeatureExtractor) -> None:
         self._extractor = extractor
 
@@ -28,7 +29,7 @@ class FeatureDecorator(FeatureExtractor):
         return final
 
 class CommentRemovalDecorator(FeatureDecorator):
-    """PRE: elimină comentarii single-line (# //) în limbile comune."""
+    """PRE: removes single-line comments (# //) in common languages."""
     def _pre(self, code: str, lang: str | None) -> str:
         out = []
         for ln in code.splitlines():
@@ -45,6 +46,7 @@ class CommentRemovalDecorator(FeatureDecorator):
         return d
 
 class IndentationStyleDecorator(FeatureDecorator):
+    """POST: analyzes indentation style in the code."""
     def _post(self, feats: Dict[str, Any], code: str, lang: str | None) -> Dict[str, Any]:
         d = dict(feats)
         lines = [l for l in code.splitlines() if l.strip()]
@@ -61,6 +63,7 @@ class IndentationStyleDecorator(FeatureDecorator):
         return d
 
 class IdentifierEntropyDecorator(FeatureDecorator):
+    """POST: calculates entropy of identifiers in the code."""
     def _post(self, feats: Dict[str, Any], code: str, lang: str | None) -> Dict[str, Any]:
         import re, math
         from collections import Counter
@@ -77,6 +80,7 @@ class IdentifierEntropyDecorator(FeatureDecorator):
         return d
 
 class PerplexityLikeDecorator(FeatureDecorator):
+    """POST: adds a perplexity-like feature based on code length."""
     def _post(self, feats: Dict[str, Any], code: str, lang: str | None) -> Dict[str, Any]:
         d = dict(feats)
         L = max(1, len(code))

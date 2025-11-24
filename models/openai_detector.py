@@ -1,5 +1,7 @@
 from typing import Any, Iterable, List
 
+from aop.aspects import timeit, log_call
+
 from .service import ModelService
 
 
@@ -25,6 +27,8 @@ class OpenAIDetectorAdapter(ModelService):
             return [str(x) for x in X]
         return [str(X)]
 
+    @timeit
+    @log_call
     def predict(self, X):
         if self._wrapped is None:
             raise RuntimeError(

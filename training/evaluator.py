@@ -1,4 +1,6 @@
+from timeit import timeit
 from typing import Any, Dict, Iterable, Optional
+from aop.aspects import log_call, timeit
 
 try:
     from sklearn.metrics import (
@@ -15,6 +17,8 @@ except Exception:
 
 # Template Method
 class BaseEvaluator:
+    @timeit
+    @log_call
     def evaluate(
         self, model: Any, X: Iterable, y: Optional[Iterable] = None, **kwargs
     ) -> Dict:
@@ -39,6 +43,8 @@ class BaseEvaluator:
 
 
 class ClassificationEvaluator(BaseEvaluator):
+    @timeit
+    @log_call
     def predict(self, model: Any, X: Iterable, **kwargs):
         y_pred = None
         extras = {}
@@ -65,6 +71,8 @@ class ClassificationEvaluator(BaseEvaluator):
                 extras.setdefault("probs", None)
         return y_pred, extras
 
+    @timeit
+    @log_call
     def compute_metrics(
         self, y_true: Iterable, y_pred: Iterable, extras: Optional[Dict] = None
     ) -> Dict:

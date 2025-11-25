@@ -18,7 +18,6 @@ class AdaBoostStrategy(ModelService):
         return self
 
     def predict(self, X):
-        proba.reshape(-1, 1)
         proba = self.model.predict_proba(X)[:, 1]
         return proba
 

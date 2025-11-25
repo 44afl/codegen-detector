@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, Request
+from flask import Flask, jsonify, request, Request, json
 from werkzeug.utils import secure_filename
 from flask_cors import CORS
 import logging
@@ -7,6 +7,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
+CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
 from models.adaboost import AdaBoostStrategy
 from core.prediction_facade import PredictionFacade
@@ -47,11 +48,15 @@ def predict_adaboost():
 
     try:
         result = facade.analyze(code)
-        return jsonify({
+        j = jsonify({
             "model": "AdaBoost",
             **result,
             "filename": file.filename
         })
+
+        print(json.dumps(j))
+
+        return j
     except Exception as e:
         print("AdaBoost error:", e)
         return jsonify({"error": str(e)}), 500

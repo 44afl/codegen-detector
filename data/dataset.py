@@ -15,7 +15,7 @@ class Dataset:
         texts = df["code"].astype(str).tolist()
         y = df["label"].astype(int).values
 
-        vectorizer = TfidfVectorizer(max_features=5000)
+        vectorizer = TfidfVectorizer(max_features=6)
         X = vectorizer.fit_transform(texts)
 
         return cls(X, y, vectorizer)

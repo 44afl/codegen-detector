@@ -1,16 +1,27 @@
-# core/prediction_facade.py
 class PredictionFacade:
     def __init__(self, model, preprocessor, feature_extractor):
-        self.model = model  
-        self.preprocessor = preprocessor 
-        self.feature_extractor = feature_extractor  
+        self.model = model
+        self.preprocessor = preprocessor
+        self.feature_extractor = feature_extractor
+
+        # ordinea caracteristicilor — IMPORTANT:
+        self.feature_order = [
+            "n_lines",
+            "avg_line_len",
+            "n_chars",
+            "n_tabs",
+            "n_spaces",
+            "n_keywords"
+        ]
 
     def analyze(self, code: str):
         processed = self.preprocessor.clean(code)
 
         features = self.feature_extractor.extract_features(processed)
 
-        X = [features]
+        row = [features[f] for f in self.feature_order]
+
+        X = [row]
 
         proba = self.model.predict(X)
 

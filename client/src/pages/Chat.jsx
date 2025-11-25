@@ -83,7 +83,7 @@ export default function Chat() {
       form.append("file", blob, f.name);
     });
 
-    const res = await fetch("http://127.0.0.1:5000/predict/adaboost", {
+    const res = await fetch("http://localhost:5000/predict/adaboost", {
       method: "POST",
       body: form,
     });
@@ -91,6 +91,9 @@ export default function Chat() {
     if (!res.ok) {
       return { error: "Server error" };
     }
+
+    let ok = await res.json();
+    console.log(JSON.stringify(ok))
 
     return await res.json();
   }

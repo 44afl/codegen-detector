@@ -20,7 +20,6 @@ class MySQLConnectionPool:
         self.pool = queue.Queue(maxsize=size)
         self.size = size
 
-        # Pre-create connections
         for _ in range(size):
             conn = self._create_conn()
             self.pool.put(conn)
@@ -75,9 +74,6 @@ def analyze_sql(func):
 
 
 def log_query(func):
-    """
-    Logs execution + slow queries.
-    """
     def wrapper(self, query, *args, **kwargs):
         cfg = Configuration.instance()
         log_enabled = cfg.get("DB_LOGGING", True)
@@ -102,9 +98,6 @@ def log_query(func):
 
 
 def cache_query(ttl=10):
-    """
-    Caches SELECT results transparently.
-    """
     def decorator(func):
         def wrapper(self, query, *args, **kwargs):
             if not query.strip().lower().startswith("select"):

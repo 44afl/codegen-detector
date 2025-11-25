@@ -17,7 +17,7 @@ export default function Chat() {
       {
         role: "assistant",
         content:
-          "Hello! I'm the SemEval 2026 Task 13 code detection assistant. Paste any code snippet or upload code files and I'll analyze whether it's human-written or machine-generated.",
+          "Hello! Upload your code or paste a snippet and I'll analyze whether it's machine-generated or human-written.",
       },
     ]);
     setUploadedFiles([]);
@@ -41,21 +41,8 @@ export default function Chat() {
   function handleFileUpload(e) {
     const files = Array.from(e.target.files);
     const allowed = [
-      "js",
-      "jsx",
-      "ts",
-      "tsx",
-      "py",
-      "java",
-      "cpp",
-      "c",
-      "cs",
-      "go",
-      "rs",
-      "rb",
-      "php",
-      "swift",
-      "kt",
+      "js", "jsx", "ts", "tsx", "py", "java", "cpp", "c", "cs",
+      "go", "rs", "rb", "php", "swift", "kt"
     ];
 
     files.forEach((file) => {
@@ -83,67 +70,72 @@ export default function Chat() {
     setUploadedFiles((prev) => prev.filter((_, i) => i !== index));
   }
 
-  function handleSubmit(e) {
+  async function analyzeWithEndpoint(text, files) {
+    const form = new FormData();
+
+    if (text.trim().length > 0) {
+      const blob = new Blob([text], { type: "text/plain" });
+      form.append("file", blob, "input.txt");
+    }
+
+    files.forEach((f) => {
+      const blob = new Blob([f.content], { type: "text/plain" });
+      form.append("file", blob, f.name);
+    });
+
+    const res = await fetch("http://127.0.0.1:5000/predict/adaboost", {
+      method: "POST",
+      body: form,
+    });
+
+    if (!res.ok) {
+      return { error: "Server error" };
+    }
+
+    return await res.json();
+  }
+
+  async function handleSubmit(e) {
     e.preventDefault();
     if (isAnalyzing) return;
 
-    const msg = inputRef.current.value.trim();
+    const text = inputRef.current.value.trim();
     const hasFiles = uploadedFiles.length > 0;
 
-    if (!msg && !hasFiles) return;
-
-    setIsAnalyzing(true);
-
-    const fileData = uploadedFiles.map((f) => ({
-      name: f.name,
-      size: f.size,
-      content: f.content,
-    }));
+    if (!text && !hasFiles) return;
 
     addMessage({
       role: "user",
-      content: msg || `Uploaded ${uploadedFiles.length} file(s) for analysis`,
-      files: fileData.length > 0 ? fileData : null,
+      content: text || `Uploaded ${uploadedFiles.length} file(s)`,
+      files: hasFiles ? uploadedFiles : null,
     });
 
+    setIsAnalyzing(true);
     inputRef.current.value = "";
+
+    addMessage({ role: "assistant", content: "Analyzing…" });
+
+    const result = await analyzeWithEndpoint(text, uploadedFiles);
+
+    setMessages((prev) => prev.slice(0, -1));
     setUploadedFiles([]);
 
-    addMessage({ role: "assistant", content: "Analyzing..." });
-
-    setTimeout(() => {
-      setMessages((prev) => prev.slice(0, -1));
-
-      const looksLikeCode =
-        msg.includes("function") ||
-        msg.includes("const") ||
-        msg.includes("class") ||
-        msg.includes("def") ||
-        fileData.length > 0;
-
-      if (!looksLikeCode) {
-        addMessage({
-          role: "assistant",
-          content:
-            "Please paste a code snippet or upload code files for me to analyze.",
-        });
-        setIsAnalyzing(false);
-        return;
-      }
-
-      const prediction = Math.random() > 0.5 ? "machine" : "human";
-      const confidence = Math.random() * 30 + 70;
-
+    if (result.error) {
       addMessage({
         role: "assistant",
-        content: `I've analyzed your code. This appears to be **${prediction}-generated** with ${confidence.toFixed(
-          1
-        )}% confidence.`,
-        analysis: { prediction, confidence },
+        content: `❌ Error: ${result.error}`,
       });
-
       setIsAnalyzing(false);
-    }, 1500);
+      return;
+    }
+
+    addMessage({
+      role: "assistant",
+      content: `Model **${result.model}** analyzed your code.\n\n**Probability machine-generated: ${(result.probability_machine_generated * 100).toFixed(1)}%**`,
+      analysis: result,
+    });
+
+    setIsAnalyzing(false);
   }
 
   return (
@@ -158,10 +150,7 @@ export default function Chat() {
               <p>Detecting Machine-Generated Code</p>
             </div>
           </div>
-
-          <button className="btn btn-outline" onClick={newChat}>
-            New Chat
-          </button>
+          <button className="btn btn-outline" onClick={newChat}>New Chat</button>
         </div>
       </header>
 
@@ -174,7 +163,7 @@ export default function Chat() {
         </div>
       </div>
 
-      {/* INPUT AREA */}
+      {/* INPUT */}
       <div className="input-area">
         <div className="input-content">
           <div className="uploaded-files">
@@ -190,7 +179,7 @@ export default function Chat() {
             <textarea
               ref={inputRef}
               className="message-input"
-              placeholder="Paste your code here or upload files..."
+              placeholder="Paste your code or upload files…"
               rows={3}
             ></textarea>
 
@@ -202,7 +191,6 @@ export default function Chat() {
                 style={{ display: "none" }}
                 onChange={handleFileUpload}
               />
-
               <button
                 type="button"
                 className="btn btn-icon"
@@ -210,10 +198,7 @@ export default function Chat() {
               >
                 📎
               </button>
-
-              <button type="submit" className="btn btn-primary">
-                ➤
-              </button>
+              <button type="submit" className="btn btn-primary">➤</button>
             </div>
           </form>
 

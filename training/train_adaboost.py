@@ -4,10 +4,9 @@ from training.trainer import Trainer
 from events.observer import ConsoleProgressObserver, LogProgressObserver
 
 if __name__ == "__main__":
-    dataset = Dataset.from_parquet("data/task_a/task_a_training_set_1.parquet")
+    dataset = Dataset.from_parquet("data/task_a_trial.parquet")
 
     trainer = Trainer()
-
     
     trainer.attach(ConsoleProgressObserver())
     trainer.attach(LogProgressObserver())
@@ -21,5 +20,7 @@ if __name__ == "__main__":
         .evaluateModel()
         .build()
     )
+
+    model.save("data/adaboost.pkl")
 
     print("[FINAL RESULTS]", results)

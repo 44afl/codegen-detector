@@ -1,14 +1,15 @@
 # models/adaboost.py
+import joblib
 from sklearn.ensemble import AdaBoostClassifier
 from .service import ModelService  
 
+
 class AdaBoostStrategy(ModelService):
     def __init__(self, **kwargs):
-       
         self.model = AdaBoostClassifier(
             n_estimators=50,
             learning_rate=1.0,
-        #    algorithm="SAMME",
+            # algorithm="SAMME",
             **kwargs
         )
 
@@ -17,8 +18,20 @@ class AdaBoostStrategy(ModelService):
         return self
 
     def predict(self, X):
-        """
-        întoarce o probabilitate între 0 și 1 (clasa 1 = 'machine').
-        """
-        proba = self.model.predict_proba(X)[:, 1] 
+        proba.reshape(-1, 1)
+        proba = self.model.predict_proba(X)[:, 1]
         return proba
+
+    # ------------------------------------------------------------
+    # SAVE MODEL
+    # ------------------------------------------------------------
+    def save(self, path: str):
+        joblib.dump(self.model, path)
+        return path
+
+    # ------------------------------------------------------------
+    # LOAD MODEL
+    # ------------------------------------------------------------
+    def load(self, path: str):
+        self.model = joblib.load(path)
+        return self

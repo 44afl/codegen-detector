@@ -1,7 +1,7 @@
 # core/prediction_facade.py
 class PredictionFacade:
-    def __init__(self, model_strategy, preprocessor, feature_extractor):
-        self.model = model_strategy  
+    def __init__(self, model, preprocessor, feature_extractor):
+        self.model = model  
         self.preprocessor = preprocessor 
         self.feature_extractor = feature_extractor  
 

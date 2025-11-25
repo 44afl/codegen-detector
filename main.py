@@ -1,40 +1,60 @@
-from flask import Flask, Request
-from models import MockModel
+from flask import Flask, jsonify, request, Request
+from werkzeug.utils import secure_filename
+from flask_cors import CORS
 import logging
-from data.dataset import Dataset
-from models.adaboost import AdaBoostStrategy
-from training.trainer import Trainer
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
-models = [MockModel()]
+
+from models.adaboost import AdaBoostStrategy
+from core.prediction_facade import PredictionFacade
+from core.preprocessor import Preprocessor
+
+# ====== MODEL LOAD ======
+from models.adaboost import AdaBoostStrategy
+from core.preprocessor import Preprocessor
+from features.extractors.basic import BasicFeatureExtractor
+from core.prediction_facade import PredictionFacade
+
+model = AdaBoostStrategy().load("data/adaboost.pkl")
+preprocessor = Preprocessor()
+feature_extractor = BasicFeatureExtractor()
+
+facade = PredictionFacade(
+    model=model,
+    preprocessor=preprocessor,
+    feature_extractor=feature_extractor
+)
 
 
-@app.route("/")
-def hello_world():
-    return "<p>Hello, World!</p>"
+# ====== ENDPOINT ======
+@app.route("/predict/adaboost", methods=["POST"])
+def predict_adaboost():
+    if "file" not in request.files:
+        return jsonify({"error": "Missing file"}), 400
 
+    file = request.files["file"]
 
-@app.route("/predict")
-def predict(request: Request):
-    if request.method != "POST":
-        return "<p>Method Not Allowed</p>", 405
-    
-    if not request.is_json:
-        return "<p>Missing input</p>", 400
+    if not file.filename:
+        return jsonify({"error": "Empty filename"}), 400
 
-    sample_input = request.json.get("input", "")
+    try:
+        code = file.read().decode("utf-8", errors="ignore")
+    except Exception as e:
+        return jsonify({"error": f"Cannot read file: {e}"}), 500
 
-    if not sample_input:
-        return "<p>Missing input</p>", 400
-    
-    predictions = [model.predict(sample_input) for model in models]
-    logger.info(f"Predictions: {predictions}")
-    avg_prediction = sum(predictions) / len(predictions)
-    return f"<p>Average Prediction: {avg_prediction}</p>"
-
+    try:
+        result = facade.analyze(code)
+        return jsonify({
+            "model": "AdaBoost",
+            **result,
+            "filename": file.filename
+        })
+    except Exception as e:
+        print("AdaBoost error:", e)
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
     app.run(debug=True)

@@ -2,4 +2,6 @@
 .venv/
 venv/
 data/task_a
-__pycache__/
+__pycache__/data/transformer_model.pkl
+data/transformer_model.pkldata/transformer_model.pkl
+data/*.pkl

@@ -4,7 +4,6 @@ export default function Chat() {
   const [messages, setMessages] = useState([]);
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [selectedModel, setSelectedModel] = useState("/predict/adaboost");
 
   const inputRef = useRef();
   const chatContainerRef = useRef();
@@ -84,7 +83,7 @@ export default function Chat() {
       form.append("file", blob, f.name);
     });
 
-    const res = await fetch(`http://localhost:5000${selectedModel}`, {
+    const res = await fetch("http://localhost:5000/predict/adaboost", {
       method: "POST",
       body: form,
     });
@@ -158,20 +157,6 @@ export default function Chat() {
       </header>
 
       {/* CHAT */}
-
-      <div className="model-select">
-        <label>Model:</label>
-        <select
-          value={selectedModel}
-          onChange={(e) => setSelectedModel(e.target.value)}
-        >
-          <option value="/predict/adaboost">AdaBoost</option>
-          <option value="/predict/svm">SVM</option>
-          <option value="/predict/lstm">LSTM</option>
-          <option value="/predict/transformer">Transformer</option>
-        </select>
-      </div>
-
       <div className="chat-container" ref={chatContainerRef}>
         <div className="messages">
           {messages.map((m, i) => (

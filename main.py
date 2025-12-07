@@ -48,15 +48,12 @@ def predict_adaboost():
 
     try:
         result = facade.analyze(code)
-        j = jsonify({
+
+        return jsonify({
             "model": "AdaBoost",
             **result,
             "filename": file.filename
         })
-
-        print(json.dumps(j))
-
-        return j
     except Exception as e:
         print("AdaBoost error:", e)
         return jsonify({"error": str(e)}), 500

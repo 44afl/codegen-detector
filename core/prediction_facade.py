@@ -4,7 +4,6 @@ class PredictionFacade:
         self.preprocessor = preprocessor
         self.feature_extractor = feature_extractor
 
-        # ordinea caracteristicilor — IMPORTANT:
         self.feature_order = [
             "n_lines",
             "avg_line_len",
@@ -16,11 +15,9 @@ class PredictionFacade:
 
     def analyze(self, code: str):
         processed = self.preprocessor.clean(code)
-
         features = self.feature_extractor.extract_features(processed)
 
-        row = [features[f] for f in self.feature_order]
-
+        row = [float(features.get(f, 0)) for f in self.feature_order]
         X = [row]
 
         proba = self.model.predict(X)

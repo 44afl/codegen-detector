@@ -21,16 +21,10 @@ class AdaBoostStrategy(ModelService):
         proba = self.model.predict_proba(X)[:, 1]
         return proba
 
-    # ------------------------------------------------------------
-    # SAVE MODEL
-    # ------------------------------------------------------------
     def save(self, path: str):
         joblib.dump(self.model, path)
         return path
 
-    # ------------------------------------------------------------
-    # LOAD MODEL
-    # ------------------------------------------------------------
     def load(self, path: str):
         self.model = joblib.load(path)
         return self

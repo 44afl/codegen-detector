@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request, Request, json
 from werkzeug.utils import secure_filename
 from flask_cors import CORS
+from models.transformer import TransformerModel
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -41,6 +42,14 @@ lstm_facade = PredictionFacade(
     model=lstm_model,
     preprocessor=preprocessor,   # sau None, dacă nu preprocesați textul
     feature_extractor=None       # sau ceva dummy
+)
+
+transformer_model = TransformerModel().load("data/transformer_model.pkl")
+
+transformer_facade = PredictionFacade(
+    model=transformer_model,
+    preprocessor=preprocessor,  # sau None dacă Transformer lucrează direct pe text
+    feature_extractor=None
 )
 
 
@@ -93,6 +102,31 @@ def predict_lstm():
         })
     except Exception as e:
         print("LSTM error:", e)
+        return jsonify({"error": str(e)}), 500
+    
+@app.route("/predict/transformer", methods=["POST"])
+def predict_transformer():
+    if "file" not in request.files:
+        return jsonify({"error": "Missing file"}), 400
+
+    file = request.files["file"]
+    if not file.filename:
+        return jsonify({"error": "Empty filename"}), 400
+
+    try:
+        code = file.read().decode("utf-8", errors="ignore")
+    except Exception as e:
+        return jsonify({"error": f"Cannot read file: {e}"}), 500
+
+    try:
+        result = transformer_facade.analyze(code)
+        return jsonify({
+            "model": "Transformer",
+            **result,
+            "filename": file.filename
+        })
+    except Exception as e:
+        print("Transformer error:", e)
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":

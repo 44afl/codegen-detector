@@ -2,6 +2,7 @@ from flask import Flask, jsonify, request, Request, json
 from werkzeug.utils import secure_filename
 from flask_cors import CORS
 import logging
+import traceback
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -10,7 +11,6 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 # CORS(app)
-
 
 
 from models.adaboost import AdaBoostStrategy
@@ -29,19 +29,9 @@ from models.transformer import TransformerModel
 import threading
 import traceback
 
-MODELS = {
-    "adaboost": None,
-    "lstm": None,
-    "transformer": None,
-    "svm": None
-}
+MODELS = {"adaboost": None, "lstm": None, "transformer": None, "svm": None}
 
-FACADES = {
-    "adaboost": None,
-    "lstm": None,
-    "transformer": None,
-    "svm": None
-}
+FACADES = {"adaboost": None, "lstm": None, "transformer": None, "svm": None}
 
 
 def load_models_thread():
@@ -59,7 +49,7 @@ def load_models_thread():
             FACADES["adaboost"] = PredictionFacade(
                 model=model,
                 preprocessor=preprocessor,
-                feature_extractor=feature_extractor
+                feature_extractor=feature_extractor,
             )
 
             MODELS["adaboost"] = model
@@ -71,35 +61,35 @@ def load_models_thread():
 
         # ==== SVM ====
 
-        # try:
-        #     svm_model = SVMModel().load("data/svm_model.pkl")
-        #     preprocessor = Preprocessor()
+        try:
+            svm_model = SVMModel().load("data/svm_model.pkl")
+            preprocessor = Preprocessor()
+            feature_extractor = BasicFeatureExtractor()
 
-        #     FACADES["svm"] = PredictionFacade(
-        #         model=svm_model,
-        #         preprocessor=preprocessor,
-        #         feature_extractor=None
-        #     )
+            FACADES["svm"] = PredictionFacade(
+                model=svm_model,
+                preprocessor=preprocessor,
+                feature_extractor=feature_extractor,
+            )
 
-        #     MODELS["svm"] = svm_model
-        #     print("SVM Model has been loaded!")
+            MODELS["svm"] = svm_model
+            print("SVM Model has been loaded!")
 
-        # except Exception as e:
-        #     print("Couldn't load SVM:", e)
-        #     traceback.print_exc()
-
+        except Exception as e:
+            print("Couldn't load SVM:", e)
+            traceback.print_exc()
 
         # ==== LSTM ====
-               
+
         try:
             lstm_model = LSTMModel().load("data/lstm_model.pkl")
             preprocessor = Preprocessor()
-            feature_extractor_lstm = BasicFeatureExtractor()  
+            feature_extractor_lstm = BasicFeatureExtractor()
 
             FACADES["lstm"] = PredictionFacade(
                 model=lstm_model,
                 preprocessor=preprocessor,
-                feature_extractor=feature_extractor_lstm   
+                feature_extractor=feature_extractor_lstm,
             )
 
             MODELS["lstm"] = lstm_model
@@ -109,17 +99,16 @@ def load_models_thread():
             print("Couldn't load LSTM:", e)
             traceback.print_exc()
 
-
         # ==== Transformer ====
         try:
             transformer_model = TransformerModel().load("data/transformer_model.pkl")
             preprocessor = Preprocessor()
-            feature_extractor_transformer = BasicFeatureExtractor()  
+            feature_extractor_transformer = BasicFeatureExtractor()
 
             FACADES["transformer"] = PredictionFacade(
                 model=transformer_model,
                 preprocessor=preprocessor,
-                feature_extractor=feature_extractor_transformer
+                feature_extractor=feature_extractor_transformer,
             )
 
             MODELS["transformer"] = transformer_model
@@ -131,6 +120,7 @@ def load_models_thread():
     except Exception as e:
         print(e)
         traceback.print_exc()
+
 
 # MISC
 def extract_code_from_request():
@@ -147,6 +137,7 @@ def extract_code_from_request():
     except Exception as e:
         return None, jsonify({"error": f"Cannot read file: {e}"}), 500
 
+
 @app.route("/predict/adaboost", methods=["POST"])
 def predict_adaboost():
 
@@ -159,13 +150,11 @@ def predict_adaboost():
 
     try:
         result = FACADES["adaboost"].analyze(code)
-        return jsonify({
-            "model": "AdaBoost",
-            **result
-        })
+        return jsonify({"model": "AdaBoost", **result})
     except Exception as e:
         print("AdaBoost error:", e)
         return jsonify({"error": str(e)}), 500
+
 
 @app.route("/predict/lstm", methods=["POST"])
 def predict_lstm():
@@ -179,33 +168,29 @@ def predict_lstm():
 
     try:
         result = FACADES["lstm"].analyze(code)
-        return jsonify({
-            "model": "LSTM",
-            **result
-        })
+        return jsonify({"model": "LSTM", **result})
     except Exception as e:
         print("LSTM error:", e)
         return jsonify({"error": str(e)}), 500
 
-# @app.route("/predict/svm", methods=["POST"])
-# def predict_svm():
 
-#     if FACADES["svm"] is None:
-#         return jsonify({"error": "SVM model not loaded"}), 503
+@app.route("/predict/svm", methods=["POST"])
+def predict_svm():
 
-#     code, error, status = extract_code_from_request()
-#     if error:
-#         return error, status
+    if FACADES["svm"] is None:
+        return jsonify({"error": "SVM model not loaded"}), 503
 
-#     try:
-#         result = FACADES["svm"].analyze(code)
-#         return jsonify({
-#             "model": "SVM",
-#             **result
-#         })
-#     except Exception as e:
-#         print("SVM error:", e)
-#         return jsonify({"error": str(e)}), 500
+    code, error, status = extract_code_from_request()
+    if error:
+        return error, status
+
+    try:
+        result = FACADES["svm"].analyze(code)
+        return jsonify({"model": "SVM", **result})
+    except Exception as e:
+        print("SVM error:", e)
+        return jsonify({"error": traceback.format_exc()}), 500
+
 
 @app.route("/predict/transformer", methods=["POST"])
 def predict_transformer():
@@ -219,14 +204,10 @@ def predict_transformer():
 
     try:
         result = MODELS["transformer"].predict(code)  # 👈 trimit text brut
-        return jsonify({
-            "model": "Transformer",
-            **result
-        })
+        return jsonify({"model": "Transformer", **result})
     except Exception as e:
         print("Transformer error:", e)
         return jsonify({"error": str(e)}), 500
-
 
 
 threading.Thread(target=load_models_thread, daemon=True).start()

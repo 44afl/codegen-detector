@@ -29,12 +29,30 @@ class TransformerModel(ModelService):
         self.optimizer.zero_grad()
         return loss.item()
 
-    def predict(self, seq: str) -> str:
+    # 🔽 noua versiune – lucrează direct pe text și întoarce label + probabilitate
+    def predict(self, seq: str):
         self.model.eval()
-        inputs = self.tokenizer(seq, return_tensors="pt", truncation=True, padding=True).to(self.device)
+
+        # tokenizer vrea string sau list[str]
+        inputs = self.tokenizer(
+            seq,
+            return_tensors="pt",
+            truncation=True,
+            padding=True,
+        ).to(self.device)
+
         with torch.no_grad():
             outputs = self.model(**inputs)
-        pred = torch.argmax(outputs.logits, dim=-1).item()
+            probs = torch.softmax(outputs.logits, dim=-1)  # shape [1, 2]
+
+        p_machine = float(probs[0, 1].cpu().item())
+        label = "machine" if p_machine >= 0.5 else "human"
+
+        return {
+            "label": label,
+            "probability_machine": p_machine,
+        }
+
         return "human" if pred == 0 else "AI"
     
     def save(self, path: str):

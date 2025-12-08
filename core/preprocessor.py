@@ -17,5 +17,5 @@ class Preprocessor:
         code = re.sub(r'\t+', '\t', code)
         code = re.sub(r' {2,}', ' ', code)
 
+        #return None. -pt testare monitor
         return code
-#return 1

@@ -18,3 +18,4 @@ class Preprocessor:
         code = re.sub(r' {2,}', ' ', code)
 
         return code
+#return 1

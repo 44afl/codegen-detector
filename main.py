@@ -8,7 +8,8 @@ logger = logging.getLogger(__name__)
 
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
+#CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
+CORS(app)
 
 
 from models.adaboost import AdaBoostStrategy

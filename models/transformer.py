@@ -36,3 +36,19 @@ class TransformerModel(ModelService):
             outputs = self.model(**inputs)
         pred = torch.argmax(outputs.logits, dim=-1).item()
         return "human" if pred == 0 else "AI"
+    
+    def save(self, path: str):
+        import joblib
+        joblib.dump(self, path)
+        return path
+
+    def load(self, path: str):
+        import joblib
+        loaded = joblib.load(path)
+        # copiem toate atributele în self
+        self.tokenizer = loaded.tokenizer
+        self.model = loaded.model
+        self.device = loaded.device
+        self.optimizer = loaded.optimizer
+        self.criterion = loaded.criterion
+        return self

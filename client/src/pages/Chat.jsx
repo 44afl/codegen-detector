@@ -8,6 +8,8 @@ export default function Chat() {
 
   const inputRef = useRef();
   const chatContainerRef = useRef();
+  const API_BASE = "http://localhost:5050";
+
 
   useEffect(() => {
     newChat();
@@ -72,30 +74,33 @@ export default function Chat() {
   }
 
   async function analyzeWithEndpoint(text, files) {
-    const form = new FormData();
+  const form = new FormData();
 
-    if (text.trim().length > 0) {
-      const blob = new Blob([text], { type: "text/plain" });
-      form.append("file", blob, "input.txt");
-    }
-
-    files.forEach((f) => {
-      const blob = new Blob([f.content], { type: "text/plain" });
-      form.append("file", blob, f.name);
-    });
-
-    const res = await fetch(`http://localhost:5000${selectedModel}`, {
-      method: "POST",
-      body: form,
-    });
-
-    if (!res.ok) {
-      return { error: "Server error" };
-    }
-
-
-    return await res.json();
+  if (text.trim().length > 0) {
+    const blob = new Blob([text], { type: "text/plain" });
+    form.append("file", blob, "input.txt");
   }
+
+  files.forEach((f) => {
+    const blob = new Blob([f.content], { type: "text/plain" });
+    form.append("file", blob, f.name);
+  });
+
+  const res = await fetch(`${API_BASE}${selectedModel}`, {
+    method: "POST",
+    body: form,
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    console.error("Backend error", res.status, text);
+    return { error: `Server error (${res.status})` };
+  }
+
+  return await res.json();
+}
+
+  
 
   async function handleSubmit(e) {
     e.preventDefault();

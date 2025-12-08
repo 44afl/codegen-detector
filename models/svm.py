@@ -1,7 +1,6 @@
 from .service import ModelService
 import joblib
-from sklearn.pipeline import Pipeline
-from sklearn.feature_extraction.text import TfidfVectorizer
+import numpy as np
 from sklearn.svm import LinearSVC
 from sklearn.calibration import CalibratedClassifierCV
 from typing import Union, Iterable
@@ -10,47 +9,60 @@ from typing import Union, Iterable
 class SVMModel(ModelService):
     """SVM-based model for detecting AI-generated text.
 
-    Uses a TF-IDF vectorizer and a LinearSVC wrapped in a
-    CalibratedClassifierCV so we can return probabilities.
+    Works with pre-vectorized features from the Dataset class.
+    Uses LinearSVC wrapped in CalibratedClassifierCV for probabilities.
     """
 
     def __init__(self, **kwargs):
         # kwargs forwarded to the LinearSVC constructor
-        self.model = Pipeline(
-            [
-                (
-                    "tfidf",
-                    TfidfVectorizer(max_features=20000, ngram_range=(1, 2), stop_words="english"),
-                ),
-                (
-                    "clf",
-                    CalibratedClassifierCV(LinearSVC(max_iter=10000, **kwargs), cv=5),
-                ),
-            ]
-        )
+        self.model = CalibratedClassifierCV(LinearSVC(max_iter=10000, **kwargs), cv=5)
 
-    def train(self, X: Iterable[str], y: Iterable[float]):
-        """Train the pipeline on raw text inputs and labels.
+    def train(self, X, y):
+        """Train the model on pre-vectorized features and labels.
+
+        X: (n_samples, n_features) – can be sparse matrix (csr_matrix)
+        y: label vector (0/1)
 
         Returns self for chaining.
         """
+        # Convert sparse matrix to dense if needed
+        if hasattr(X, "toarray"):
+            X = X.toarray()
+
+        X = np.asarray(X, dtype="float32")
+        y = np.asarray(y)
+
+        if X.ndim == 1:
+            X = X.reshape(-1, 1)
+
+        if X.ndim != 2:
+            raise ValueError(f"[SVM] X should be 2D, got shape {X.shape}")
+
+        print("[SVM] Starting fit on", X.shape)
         self.model.fit(X, y)
+        print("[SVM] Finished fit.")
         return self
 
-    def predict(self, X: Union[str, Iterable[str]]):
+    def predict(self, X):
         """Return probability (or probabilities) that input(s) are AI-generated.
 
-        If a single string is provided, returns a float in [0,1]. If an iterable
-        (list/array) is provided, returns a numpy array of probabilities.
+        X: pre-vectorized features, shape (n_samples, n_features)
+        Returns numpy array of probabilities in [0,1].
         """
-        single = False
-        if isinstance(X, str):
-            single = True
-            X = [X]
+        # Convert sparse matrix to dense if needed
+        if hasattr(X, "toarray"):
+            X = X.toarray()
+
+        X = np.asarray(X, dtype="float32")
+
+        if X.ndim == 1:
+            X = X.reshape(-1, 1)
+
+        if X.ndim != 2:
+            raise ValueError(f"[SVM] X should be 2D in predict, got shape {X.shape}")
 
         proba = self.model.predict_proba(X)[:, 1]
-
-        return float(proba[0]) if single else proba
+        return proba
 
     def save(self, path: str):
         joblib.dump(self.model, path)

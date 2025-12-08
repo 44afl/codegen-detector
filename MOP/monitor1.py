@@ -8,7 +8,11 @@ logger = logging.getLogger(__name__)
 
 
 def ensure_returns_str(func):
- 
+    """
+    MOP Monitor for Preprocessor.clean:
+    Ensures that the function always returns a string.
+    """
+
     @wraps(func)
     def wrapper(*args, **kwargs):
         result = func(*args, **kwargs)
@@ -16,7 +20,7 @@ def ensure_returns_str(func):
         if not isinstance(result, str):
             msg = (
                 f"[MOP] Violation: {func.__qualname__} "
-                f"trebuie să returneze str, dar a întors {type(result)}"
+                f"must return a string, but returned {type(result)}."
             )
             logger.error(msg)
             raise AssertionError(msg)
@@ -28,12 +32,14 @@ def ensure_returns_str(func):
 
 def ensure_valid_prediction(func):
     """
-    Monitor pentru PredictionFacade.analyze:
-      - trebuie să întoarcă un dict
-      - cu cheile: 'probability_machine' și 'label'
-      - probability_machine ∈ [0, 1]
+    MOP Monitor for PredictionFacade.analyze:
+    Ensures that:
+      - The function returns a dictionary
+      - The dictionary contains 'probability_machine' and 'label'
+      - probability_machine is in the interval [0, 1]
       - label ∈ {'machine', 'human'}
     """
+
     @wraps(func)
     def wrapper(*args, **kwargs):
         result = func(*args, **kwargs)
@@ -41,15 +47,15 @@ def ensure_valid_prediction(func):
         if not isinstance(result, dict):
             msg = (
                 f"[MOP] Violation: {func.__qualname__} "
-                f"trebuie să returneze dict, nu {type(result)}"
+                f"must return a dictionary, but returned {type(result)}."
             )
             logger.error(msg)
             raise AssertionError(msg)
 
         if "probability_machine" not in result or "label" not in result:
             msg = (
-                f"[MOP] Violation: {func.__qualname__} trebuie să conțină "
-                f"cheile 'probability_machine' și 'label', dar a întors: {result.keys()}"
+                f"[MOP] Violation: {func.__qualname__} must contain "
+                f"the keys 'probability_machine' and 'label', but returned: {result.keys()}."
             )
             logger.error(msg)
             raise AssertionError(msg)
@@ -59,16 +65,16 @@ def ensure_valid_prediction(func):
 
         if not isinstance(p, (int, float)) or not (0.0 <= p <= 1.0):
             msg = (
-                f"[MOP] Violation: probability_machine trebuie să fie în [0, 1], "
-                f"dar este {p!r}"
+                f"[MOP] Violation: probability_machine must be within [0, 1], "
+                f"but is {p!r}."
             )
             logger.error(msg)
             raise AssertionError(msg)
 
         if label not in ("machine", "human"):
             msg = (
-                f"[MOP] Violation: label trebuie să fie 'machine' sau 'human', "
-                f"dar este {label!r}"
+                f"[MOP] Violation: label must be either 'machine' or 'human', "
+                f"but is {label!r}."
             )
             logger.error(msg)
             raise AssertionError(msg)
@@ -78,9 +84,10 @@ def ensure_valid_prediction(func):
     return wrapper
 
 
+# Instrumentation (monkey-patching)
 Preprocessor.clean = ensure_returns_str(Preprocessor.clean)
 PredictionFacade.analyze = ensure_valid_prediction(PredictionFacade.analyze)
 
 logger.info(
-    "[MOP] Componenta 1 activă: Preprocessor.clean și PredictionFacade.analyze sunt monitorizate."
+    "[MOP] Component 1 active: Preprocessor.clean and PredictionFacade.analyze are monitored."
 )

@@ -79,6 +79,8 @@ def ensure_valid_prediction(func):
             logger.error(msg)
             raise AssertionError(msg)
 
+        print("[MOP] ensure_valid_prediction has passed!")
+
         return result
 
     return wrapper

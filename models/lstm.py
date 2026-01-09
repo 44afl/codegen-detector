@@ -6,14 +6,6 @@ from sklearn.neural_network import MLPClassifier
 
 
 class LSTMModel(ModelService):
-    """
-    'LSTMModel' în sens de model NN diferit de AdaBoost/SVM,
-    implementat ca MLP (rețea neuronală feed-forward) peste
-    aceleași features numerice folosite de AdaBoost.
-
-    Se integrează în același pipeline Trainer -> prepareData -> X, y.
-    """
-
     def __init__(
         self,
         hidden_layer_sizes=(32, 16),

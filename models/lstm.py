@@ -1,11 +1,20 @@
 from .service import ModelService
 import os
+import logging
 import numpy as np
 import joblib
 from sklearn.neural_network import MLPClassifier
 
+logger = logging.getLogger(__name__)
 
+"""
+method for refactoring: Extract Method
+duplicate code ( _prepare_X ) extracted from train and predict methods
+
+"""
 class LSTMModel(ModelService):
+
+
     def __init__(
         self,
         hidden_layer_sizes=(32, 16),
@@ -27,58 +36,54 @@ class LSTMModel(ModelService):
             **kwargs
         )
 
+    # -------------------------
+    # Extract Method (refactoring)
+    # -------------------------
+    def _prepare_X(self, X, *, context: str) -> np.ndarray:
+
+        if hasattr(X, "toarray"):
+            X = X.toarray()
+
+        X = np.asarray(X, dtype="float32")
+
+        if X.ndim == 1:
+            X = X.reshape(-1, 1)
+
+        if X.ndim != 2:
+            raise ValueError(f"[MLP] X should be 2D in {context}, got shape {X.shape}")
+
+        return X
+
     def train(self, X, y):
         """
         X: (n_samples, n_features) – poate fi și csr_matrix (sparse)
         y: vector etichete (0/1)
         """
-        # Dacă e matrice sparse, o facem densă
-        if hasattr(X, "toarray"):
-            X = X.toarray()
-
-        X = np.asarray(X, dtype="float32")
+        X = self._prepare_X(X, context="train")
         y = np.asarray(y)
 
-        if X.ndim == 1:
-            X = X.reshape(-1, 1)
-
-        if X.ndim != 2:
-            raise ValueError(f"[MLP] X should be 2D, got shape {X.shape}")
-
-        print("[MLP] Starting fit on", X.shape)
+        logger.info("[MLP] Starting fit on %s", X.shape)
         self.model.fit(X, y)
-        print("[MLP] Finished fit.")
+        logger.info("[MLP] Finished fit.")
         return self
 
     def predict(self, X):
-        """
-        Returnează probabilitățile clasei pozitive (AI-generated),
-        la fel ca AdaBoost: vector de proba în [0,1].
-        """
-        if hasattr(X, "toarray"):
-            X = X.toarray()
-
-        X = np.asarray(X, dtype="float32")
-
-        if X.ndim == 1:
-            X = X.reshape(-1, 1)
-
-        if X.ndim != 2:
-            raise ValueError(f"[MLP] X should be 2D in predict, got shape {X.shape}")
-
+        X = self._prepare_X(X, context="predict")
         proba = self.model.predict_proba(X)[:, 1]
         return proba
 
     def save(self, path: str):
-        os.makedirs(os.path.dirname(path), exist_ok=True)
+        folder = os.path.dirname(path)
+        if folder:
+            os.makedirs(folder, exist_ok=True)
         joblib.dump(self.model, path)
         return path
 
     def load(self, path: str):
         if not os.path.exists(path):
-            print(f"[MLP] Warning: model file {path} not found. Using fresh untrained model.")
+            logger.warning("[MLP] Warning: model file %s not found. Using fresh untrained model.", path)
             return self
 
         self.model = joblib.load(path)
-        print(f"[MLP] Loaded model from {path}")
+        logger.info("[MLP] Loaded model from %s", path)
         return self

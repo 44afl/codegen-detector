@@ -1,45 +1,104 @@
 import pandas as pd
+import numpy as np
 from models.transformer import TransformerModel
+from core.preprocessor import Preprocessor
+from features.extractors.basic import BasicFeatureExtractor
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 
 if __name__ == "__main__":
+    print("[TRANSFORMER TRAINING] Loading dataset...")
     df = pd.read_parquet("data/task_a_trial.parquet")
-    print("Columns:", df.columns)
-
-    TEXT_COL = "code"
-    LABEL_COL = "label"
-
-    texts = df[TEXT_COL].astype(str).tolist()
-    labels = df[LABEL_COL].astype(int).tolist()
-
-    subset_size = 1000 
-    texts = texts[:subset_size]
-    labels = labels[:subset_size]
-    print(f"Using subset of {len(texts)} samples for training.")
-
+    df = df.dropna(subset=["code", "label"])
+    
+    print(f"[TRANSFORMER TRAINING] Dataset size: {len(df)} samples")
+    
+    # Initialize preprocessor and feature extractor (same as in prediction)
+    preprocessor = Preprocessor()
+    feature_extractor = BasicFeatureExtractor()
+    
+    # Feature order must match PredictionFacade
+    feature_order = [
+        "n_lines",
+        "avg_line_len",
+        "n_chars",
+        "n_tabs",
+        "n_spaces",
+        "n_keywords"
+    ]
+    
+    print("[TRANSFORMER TRAINING] Extracting features...")
+    X_list = []
+    y_list = []
+    
+    for idx, row in df.iterrows():
+        try:
+            code = str(row["code"])
+            label = int(row["label"])
+            
+            # Process code same way as in prediction
+            processed = preprocessor.clean(code)
+            features = feature_extractor.extract_features(processed)
+            
+            # Create feature vector in correct order
+            feature_vector = [float(features.get(f, 0)) for f in feature_order]
+            
+            X_list.append(feature_vector)
+            y_list.append(label)
+            
+            if (idx + 1) % 100 == 0:
+                print(f"[TRANSFORMER TRAINING] Processed {idx + 1}/{len(df)} samples...")
+                
+        except Exception as e:
+            print(f"[TRANSFORMER TRAINING] Error processing row {idx}: {e}")
+            continue
+    
+    X = np.array(X_list, dtype=np.float32)
+    y = np.array(y_list, dtype=np.int32)
+    
+    print(f"[TRANSFORMER TRAINING] Final dataset: X shape={X.shape}, y shape={y.shape}")
+    
+    # Split train/test
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42, stratify=y
+    )
+    
+    print(f"[TRANSFORMER TRAINING] Train size: {len(X_train)}, Test size: {len(X_test)}")
+    
+    # Train model
+    print("[TRANSFORMER TRAINING] Training model...")
     model = TransformerModel()
-
-    batch_size = 32
-    num_epochs = 1
-
-    for epoch in range(num_epochs):
-        epoch_loss = 0.0
-        num_batches = (len(texts) + batch_size - 1) // batch_size
-        print(f"[EPOCH {epoch+1}] starting, {num_batches} batches...")
-
-        for batch_idx in range(0, len(texts), batch_size):
-            batch_texts = texts[batch_idx:batch_idx + batch_size]
-            batch_labels = labels[batch_idx:batch_idx + batch_size]
-
-            loss = model.train(batch_texts, batch_labels)
-            epoch_loss += loss
-
-            # progres la fiecare 10 batch-uri
-            current_batch = batch_idx // batch_size + 1
-            if current_batch % 10 == 0 or current_batch == num_batches:
-                print(f"  batch {current_batch}/{num_batches} - last_loss={loss:.4f}")
-
-        print(f"[EPOCH {epoch + 1}] total_loss = {epoch_loss:.4f}")
-
-    import joblib
-    joblib.dump(model, "data/transformer_model.pkl")
-    print("[FINAL RESULTS TRANSFORMER] saved transformer_model.pkl")
+    model.train(X_train, y_train)
+    
+    print("[TRANSFORMER TRAINING] Training complete!")
+    
+    # Evaluate
+    print("[TRANSFORMER TRAINING] Evaluating model...")
+    y_pred_proba = model.predict(X_test)
+    y_pred = (y_pred_proba > 0.5).astype(int)
+    
+    accuracy = accuracy_score(y_test, y_pred)
+    precision = precision_score(y_test, y_pred)
+    recall = recall_score(y_test, y_pred)
+    f1 = f1_score(y_test, y_pred)
+    
+    print(f"\n[TRANSFORMER RESULTS]")
+    print(f"  Accuracy:  {accuracy:.4f}")
+    print(f"  Precision: {precision:.4f}")
+    print(f"  Recall:    {recall:.4f}")
+    print(f"  F1 Score:  {f1:.4f}")
+    
+    # Check probability distribution
+    print(f"\n[TRANSFORMER PROBABILITY CHECK]")
+    print(f"  Min probability: {y_pred_proba.min():.6f}")
+    print(f"  Max probability: {y_pred_proba.max():.6f}")
+    print(f"  Mean probability: {y_pred_proba.mean():.6f}")
+    print(f"  Median probability: {np.median(y_pred_proba):.6f}")
+    print(f"  Class 0 (human) count: {np.sum(y_pred == 0)}")
+    print(f"  Class 1 (machine) count: {np.sum(y_pred == 1)}")
+    
+    # Save model
+    print("\n[TRANSFORMER TRAINING] Saving model...")
+    model.save("data/transformer_model.pkl")
+    
+    print("[TRANSFORMER TRAINING] ✓ Training complete! Model saved to data/transformer_model.pkl")

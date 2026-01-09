@@ -302,7 +302,7 @@ function Message({ role, content, files, analysis }) {
                     {analysis.label === "machine"
                       ? "Machine-Generated"
                       : "Human-Written"}
-                  </span>, Probability {analysis.probability_machine} (&gt;0.5 to be Machine-Generated)
+                  </span>, Probability {analysis.probability_machine} (&gt;0.7 to be Machine-Generated)
                 </span>
               </div>
 

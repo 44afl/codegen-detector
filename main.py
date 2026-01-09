@@ -208,6 +208,14 @@ def predict_svm():
 
     try:
         result = FACADES["svm"].analyze(code)
+        
+        print(f"[SVM] Raw probability: {result['probability_machine']}")
+
+        prob = float(result['probability_machine'])
+        if prob < 1e-10 or prob > (1 - 1e-10):
+            print(f"[SVM WARNING] Extreme probability detected: {prob}")
+            print("[SVM] Model might not be properly calibrated. Consider retraining.")
+        
         return jsonify({"model": "SVM", **result})
     except Exception as e:
         print("SVM error:", e)

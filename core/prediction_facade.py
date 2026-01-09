@@ -24,5 +24,5 @@ class PredictionFacade:
 
         return {
             "probability_machine": float(proba[0]),
-            "label": "machine" if proba[0] > 0.5 else "human"
+            "label": "machine" if proba[0] > 0.7 else "human"
         }

@@ -236,7 +236,7 @@ export default function Landing() {
           </div>
         </div>
       </section>
-
+{/* 
       <section className="stats-section">
         <div className="container">
           <div className="stats-grid">
@@ -258,7 +258,7 @@ export default function Landing() {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
 
       <section className="features" id="features">
         <div className="container">

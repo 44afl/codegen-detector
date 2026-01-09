@@ -61,7 +61,23 @@ class SVMModel(ModelService):
         if X.ndim != 2:
             raise ValueError(f"[SVM] X should be 2D in predict, got shape {X.shape}")
 
-        proba = self.model.predict_proba(X)[:, 1]
+        try:
+            proba = self.model.predict_proba(X)[:, 1]
+        except AttributeError:
+            # Fallback: model might not be calibrated, use decision_function
+            print("[SVM WARNING] predict_proba not available, using decision_function")
+            decision = self.model.decision_function(X)
+            # Normalize decision function to [0,1] using sigmoid
+            proba = 1 / (1 + np.exp(-decision))
+        
+        # Safety check: clip to [0,1] range
+        proba = np.clip(proba, 0.0, 1.0)
+        
+        # Debug: check for invalid values
+        if np.any(proba < 0) or np.any(proba > 1):
+            print(f"[SVM WARNING] Invalid probabilities detected: min={proba.min()}, max={proba.max()}")
+            proba = np.clip(proba, 0.0, 1.0)
+        
         return proba
 
     def save(self, path: str):

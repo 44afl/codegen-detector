@@ -1,0 +1,10 @@
+Method,Name,Error,Occurrences
+POST,/predict/svm,CatchResponseError('Status: 0'),225
+GET,/legal/terms,CatchResponseError('Status: 0'),57
+POST,/auth/signup,CatchResponseError('Status: 201'),202
+POST,/auth/login,CatchResponseError('Status: 0'),109
+POST,/predict/adaboost,CatchResponseError('Status: 0'),421
+POST,/predict/lstm,CatchResponseError('Status: 0'),124
+POST,/predict/transformer,CatchResponseError('Status: 0'),115
+GET,/subscriptions/plans,CatchResponseError('Status: 0'),33
+POST,/auth/signup,CatchResponseError('Status: 0'),69

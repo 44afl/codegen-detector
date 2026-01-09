@@ -1,17 +1,23 @@
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function Chat() {
   const [messages, setMessages] = useState([]);
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [selectedModel, setSelectedModel] = useState("/predict/adaboost");
+  const [user, setUser] = useState(null);
 
   const inputRef = useRef();
   const chatContainerRef = useRef();
+  const navigate = useNavigate();
   const API_BASE = "http://localhost:5050";
 
-
   useEffect(() => {
+    const userData = localStorage.getItem("user");
+    if (userData) {
+      setUser(JSON.parse(userData));
+    }
     newChat();
   }, []);
 
@@ -146,9 +152,14 @@ export default function Chat() {
     setIsAnalyzing(false);
   }
 
+  const handleLogout = () => {
+    localStorage.removeItem("session_token");
+    localStorage.removeItem("user");
+    navigate("/");
+  };
+
   return (
     <div className="app">
-      {/* HEADER */}
       <header className="header">
         <div className="header-content">
           <div className="header-left">
@@ -158,11 +169,22 @@ export default function Chat() {
               <p>Detecting Machine-Generated Code</p>
             </div>
           </div>
-          <button className="btn btn-outline" onClick={newChat}>New Chat</button>
+          <div className="header-actions">
+            {user && (
+              <div className="user-menu">
+                <span className="user-name">{user.email}</span>
+                <button className="btn btn-outline" onClick={() => navigate("/subscriptions")}>
+                  Subscriptions
+                </button>
+                <button className="btn btn-outline" onClick={handleLogout}>
+                  Logout
+                </button>
+              </div>
+            )}
+            <button className="btn btn-outline" onClick={newChat}>New Chat</button>
+          </div>
         </div>
       </header>
-
-      {/* CHAT */}
 
       <div className="model-select">
         <label>Model:</label>
@@ -280,7 +302,7 @@ function Message({ role, content, files, analysis }) {
                     {analysis.label === "machine"
                       ? "Machine-Generated"
                       : "Human-Written"}
-                  </span>, Probability {analysis.probability_machine} (>0.5 to be Machine-Generated)
+                  </span>, Probability {analysis.probability_machine} (&gt;0.5 to be Machine-Generated)
                 </span>
               </div>
 

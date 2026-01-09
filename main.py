@@ -27,20 +27,6 @@ from core.prediction_facade import PredictionFacade
 from models.lstm import LSTMModel
 from models.svm import SVMModel
 from models.transformer import TransformerModel
-from MOP.model_loaded_monitor import mop_model_load, mop_predict_only_if_loaded
-
-AdaBoostStrategy.load = mop_model_load("adaboost")(AdaBoostStrategy.load)
-AdaBoostStrategy.predict = mop_predict_only_if_loaded("adaboost")(AdaBoostStrategy.predict)
-
-SVMModel.load = mop_model_load("svm")(SVMModel.load)
-SVMModel.predict = mop_predict_only_if_loaded("svm")(SVMModel.predict)
-
-LSTMModel.load = mop_model_load("lstm")(LSTMModel.load)
-LSTMModel.predict = mop_predict_only_if_loaded("lstm")(LSTMModel.predict)
-
-TransformerModel.load = mop_model_load("transformer")(TransformerModel.load)
-TransformerModel.predict = mop_predict_only_if_loaded("transformer")(TransformerModel.predict)
-
 
 import threading
 import traceback

@@ -11,7 +11,8 @@ if __name__ == "__main__":
     texts = df[TEXT_COL].astype(str).tolist()
     labels = df[LABEL_COL].astype(int).tolist()
 
-    subset_size = 1000 
+    # ==== SUBSET PENTRU TEST (ca să nu moară CPU-ul) ====
+    subset_size = 1000   # poți crește mai târziu
     texts = texts[:subset_size]
     labels = labels[:subset_size]
     print(f"Using subset of {len(texts)} samples for training.")

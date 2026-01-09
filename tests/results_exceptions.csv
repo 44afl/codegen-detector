@@ -1,0 +1,17 @@
+Count,Message,Traceback,Nodes
+1,'NoneType' object has no attribute 'url',"  File ""C:\Users\Andrei\AppData\Local\Programs\Python\Python312\Lib\site-packages\locust\user\task.py"", line 340, in run
+    self.execute_next_task()
+  File ""C:\Users\Andrei\AppData\Local\Programs\Python\Python312\Lib\site-packages\locust\user\task.py"", line 373, in execute_next_task
+    self.execute_task(self._task_queue.popleft())
+  File ""C:\Users\Andrei\AppData\Local\Programs\Python\Python312\Lib\site-packages\locust\user\task.py"", line 385, in execute_task
+    task(self)
+  File ""C:\Users\Andrei\Desktop\git\codegen-detector\tests\locustfile.py"", line 170, in login
+    with self.client.post(
+         ^^^^^^^^^^^^^^^^^
+  File ""C:\Users\Andrei\AppData\Local\Programs\Python\Python312\Lib\site-packages\locust\clients.py"", line 286, in post
+    return self.request(""POST"", url, data=data, json=json, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File ""C:\Users\Andrei\AppData\Local\Programs\Python\Python312\Lib\site-packages\locust\clients.py"", line 196, in request
+    url = request_before_redirect.url  # type: ignore
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+",local

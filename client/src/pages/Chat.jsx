@@ -186,19 +186,6 @@ export default function Chat() {
         </div>
       </header>
 
-      <div className="model-select">
-        <label>Model:</label>
-        <select
-          value={selectedModel}
-          onChange={(e) => setSelectedModel(e.target.value)}
-        >
-          <option value="/predict/adaboost">AdaBoost</option>
-          <option value="/predict/svm">SVM</option>
-          <option value="/predict/lstm">LSTM</option>
-          <option value="/predict/transformer">Transformer</option>
-        </select>
-      </div>
-
       <div className="chat-container" ref={chatContainerRef}>
         <div className="messages">
           {messages.map((m, i) => (
@@ -210,6 +197,19 @@ export default function Chat() {
       {/* INPUT */}
       <div className="input-area">
         <div className="input-content">
+          <div className="model-select">
+            <label>Model:</label>
+            <select
+              value={selectedModel}
+              onChange={(e) => setSelectedModel(e.target.value)}
+            >
+              <option value="/predict/adaboost">AdaBoost</option>
+              <option value="/predict/svm">SVM</option>
+              <option value="/predict/lstm">LSTM</option>
+              <option value="/predict/transformer">Transformer</option>
+            </select>
+          </div>
+
           <div className="uploaded-files">
             {uploadedFiles.map((f, i) => (
               <div className="file-chip" key={i}>

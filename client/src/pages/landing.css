@@ -31,55 +31,97 @@
   padding: 0 1.5rem;
 }
 
-.header {
+.nav-shell {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  background: rgba(10, 10, 20, 0.8);
+  z-index: 1000;
+  background: rgba(10, 10, 20, 0.82);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
-  z-index: 1000;
-  transition: all 0.3s ease;
+  transition: background 0.25s ease, box-shadow 0.25s ease;
 }
 
-.header-content {
+.nav-shell.scrolled {
+  background: rgba(10, 10, 20, 0.95);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+}
+
+.navbar {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 1rem 0;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.9rem 0;
 }
 
-.logo {
+.nav-brand {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  font-size: 1.25rem;
-  font-weight: 700;
+  background: none;
+  border: none;
   color: var(--text);
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
 }
 
-.logo svg {
-  color: var(--primary);
+.brand-mark {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: white;
+  box-shadow: 0 12px 28px rgba(79, 70, 229, 0.35);
 }
 
-.nav {
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.brand-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.brand-sub {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.nav-links {
   display: flex;
   align-items: center;
-  gap: 2rem;
+  gap: 1.25rem;
 }
 
-.nav button {
+.nav-link {
+  background: none;
+  border: none;
   color: var(--text-muted);
-  text-decoration: none;
   font-size: 0.95rem;
-  transition: color 0.3s;
-  font-family: inherit;
-  padding: 0;
+  cursor: pointer;
+  padding: 0.4rem 0.2rem;
+  transition: color 0.2s ease, transform 0.2s ease;
 }
 
-.nav button:hover {
+.nav-link:hover {
   color: var(--text);
+  transform: translateY(-1px);
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
 .btn-primary {
@@ -87,16 +129,34 @@
   color: white;
   border: none;
   padding: 0.65rem 1.5rem;
-  border-radius: 0.5rem;
-  font-weight: 600;
+  border-radius: 0.6rem;
+  font-weight: 700;
   cursor: pointer;
+  font-size: 0.9rem;
   transition: transform 0.2s, box-shadow 0.2s;
-  font-size: 0.875rem;
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 16px rgba(79, 70, 229, 0.3);
+  box-shadow: 0 10px 20px rgba(79, 70, 229, 0.35);
+}
+
+.btn-ghost {
+  background: none;
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 0.6rem 1.1rem;
+  border-radius: 0.6rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+
+.btn-ghost:hover {
+  border-color: var(--text-muted);
+  color: #fff;
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .btn-secondary {
@@ -121,60 +181,135 @@
   font-size: 1rem;
 }
 
-.mobile-menu-btn {
+.mobile-toggle {
   display: none;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
   flex-direction: column;
-  gap: 4px;
-  background: none;
-  border: none;
   cursor: pointer;
-  padding: 0.5rem;
+  padding: 10px;
+  transition: border-color 0.2s;
 }
 
-.mobile-menu-btn span {
-  width: 24px;
+.mobile-toggle span {
+  width: 22px;
   height: 2px;
   background: var(--text);
-  transition: all 0.3s;
+  transition: transform 0.2s ease, opacity 0.2s ease;
 }
 
-.mobile-menu {
-  display: none;
+.mobile-toggle.open span:nth-child(1) {
+  transform: translateY(6px) rotate(45deg);
+}
+
+.mobile-toggle.open span:nth-child(2) {
+  opacity: 0;
+}
+
+.mobile-toggle.open span:nth-child(3) {
+  transform: translateY(-6px) rotate(-45deg);
+}
+
+.nav-backdrop {
   position: fixed;
-  top: 65px;
-  left: 0;
-  right: 0;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 1050;
+}
+
+.nav-backdrop.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.nav-drawer {
+  position: fixed;
+  top: 0;
+  right: -100%;
+  width: 80%;
+  max-width: 360px;
+  height: 100vh;
   background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  padding: 1rem;
-  flex-direction: column;
-  gap: 1rem;
-  z-index: 999;
-}
-
-.mobile-menu.active {
+  border-left: 1px solid var(--border);
+  box-shadow: -12px 0 40px rgba(0, 0, 0, 0.35);
+  padding: 1.5rem;
   display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  transition: right 0.25s ease;
+  z-index: 1100;
 }
 
-.mobile-menu button {
-  color: var(--text-muted);
-  text-decoration: none;
-  padding: 0.5rem;
-  transition: color 0.3s;
+.nav-drawer.open {
+  right: 0;
+}
+
+.nav-drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nav-brand.mini {
+  cursor: default;
+}
+
+.drawer-close {
   background: none;
-  border: none;
+  border: 1px solid var(--border);
+  color: var(--text);
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
   cursor: pointer;
-  font-family: inherit;
-  font-size: 1rem;
-  text-align: left;
 }
 
-.mobile-menu button:hover {
-  color: var(--text);
+.nav-drawer-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.nav-drawer-links .nav-link {
+  text-align: left;
+  padding: 0.65rem 0;
+  width: 100%;
+  border-bottom: 1px solid var(--border);
+}
+
+.nav-drawer-actions {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+@media (max-width: 960px) {
+  .nav-links,
+  .nav-actions {
+    display: none;
+  }
+
+  .mobile-toggle {
+    display: flex;
+  }
+
+  .navbar {
+    padding: 0.75rem 0;
+  }
 }
 
 .hero {
-  margin-top: 80px;
+  margin-top: 96px;
   padding: 5rem 0;
   background: radial-gradient(circle at 20% 50%, rgba(79, 70, 229, 0.1) 0%, transparent 50%),
     radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.1) 0%, transparent 50%);
@@ -378,9 +513,8 @@
   font-size: 3rem;
   font-weight: 800;
   background: linear-gradient(135deg, var(--primary), var(--accent));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
   background-clip: text;
+  color: white;
 }
 
 .stat-description {

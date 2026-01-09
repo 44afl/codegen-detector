@@ -66,81 +66,43 @@ export default function Landing() {
 
   return (
     <div className="landing-page">
-      <header
-        className={`header ${headerBackground ? "scrolled" : ""}`}
-        style={
-          headerBackground
-            ? {
-                background: "rgba(10, 10, 20, 0.95)",
-                boxShadow: "0 4px 20px rgba(0, 0, 0, 0.3)",
-              }
-            : {
-                background: "rgba(10, 10, 20, 0.8)",
-                boxShadow: "none",
-              }
-        }
-      >
+      <header className={`nav-shell ${headerBackground ? "scrolled" : ""}`}>
         <div className="container">
-          <div className="header-content">
-            <div className="logo">
-              <svg
-                width="32"
-                height="32"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <polyline points="16 18 22 12 16 6"></polyline>
-                <polyline points="8 6 2 12 8 18"></polyline>
-              </svg>
-              <span>CodeGen Detector</span>
-            </div>
-            <nav className="nav">
-              <button
-                onClick={() => scrollToSection("features")}
-                style={{
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  color: "inherit",
-                }}
-              >
+          <div className="navbar">
+            <button
+              className="nav-brand"
+              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            >
+              <div className="brand-mark">⚡</div>
+              <div className="brand-text">
+                <span className="brand-title">CodeGen Detector</span>
+                <span className="brand-sub">AI authenticity check</span>
+              </div>
+            </button>
+
+            <div className="nav-links">
+              <button className="nav-link" onClick={() => scrollToSection("features")}>
                 Features
               </button>
-              <button
-                onClick={() => scrollToSection("how-it-works")}
-                style={{
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  color: "inherit",
-                }}
-              >
+              <button className="nav-link" onClick={() => scrollToSection("how-it-works")}>
                 How It Works
               </button>
-              <button
-                onClick={() => scrollToSection("pricing")}
-                style={{
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  color: "inherit",
-                }}
-              >
+              <button className="nav-link" onClick={() => scrollToSection("pricing")}>
                 Pricing
               </button>
-              <button
-                className="btn-primary"
-                onClick={() => navigate("/signup")}
-              >
-                Get Started
+            </div>
+
+            <div className="nav-actions">
+              <button className="btn-ghost" onClick={() => navigate("/login")}>
+                Log in
               </button>
-            </nav>
+              <button className="btn-primary" onClick={() => navigate("/signup")}>Start free</button>
+            </div>
+
             <button
-              className="mobile-menu-btn"
-              id="mobileMenuBtn"
+              className={`mobile-toggle ${mobileMenuActive ? "open" : ""}`}
               onClick={handleMobileMenuToggle}
+              aria-label="Toggle navigation"
             >
               <span></span>
               <span></span>
@@ -150,58 +112,43 @@ export default function Landing() {
         </div>
       </header>
 
-      <div className={`mobile-menu ${mobileMenuActive ? "active" : ""}`}>
-        <button
-          onClick={() => {
-            scrollToSection("features");
-            closeMobileMenu();
-          }}
-          style={{
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            color: "inherit",
-          }}
-        >
-          Features
-        </button>
-        <button
-          onClick={() => {
-            scrollToSection("how-it-works");
-            closeMobileMenu();
-          }}
-          style={{
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            color: "inherit",
-          }}
-        >
-          How It Works
-        </button>
-        <button
-          onClick={() => {
-            scrollToSection("pricing");
-            closeMobileMenu();
-          }}
-          style={{
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            color: "inherit",
-          }}
-        >
-          Pricing
-        </button>
-        <button
-          className="btn-primary"
-          onClick={() => {
-            navigate("/signup");
-            closeMobileMenu();
-          }}
-        >
-          Get Started
-        </button>
+      <div
+        className={`nav-backdrop ${mobileMenuActive ? "show" : ""}`}
+        onClick={closeMobileMenu}
+      ></div>
+
+      <div className={`nav-drawer ${mobileMenuActive ? "open" : ""}`}>
+        <div className="nav-drawer-header">
+          <div className="nav-brand mini">
+            <div className="brand-mark">⚡</div>
+            <div className="brand-text">
+              <span className="brand-title">CodeGen Detector</span>
+              <span className="brand-sub">AI authenticity check</span>
+            </div>
+          </div>
+          <button className="drawer-close" onClick={closeMobileMenu} aria-label="Close menu">
+            ✕
+          </button>
+        </div>
+
+        <div className="nav-drawer-links">
+          <button className="nav-link" onClick={() => scrollToSection("features")}>Features</button>
+          <button className="nav-link" onClick={() => scrollToSection("how-it-works")}>
+            How It Works
+          </button>
+          <button className="nav-link" onClick={() => scrollToSection("pricing")}>
+            Pricing
+          </button>
+        </div>
+
+        <div className="nav-drawer-actions">
+          <button className="btn-ghost" onClick={() => { navigate("/login"); closeMobileMenu(); }}>
+            Log in
+          </button>
+          <button className="btn-primary" onClick={() => { navigate("/signup"); closeMobileMenu(); }}>
+            Start free
+          </button>
+        </div>
       </div>
 
       <section className="hero">
@@ -536,26 +483,14 @@ export default function Landing() {
             <div className="footer-section">
               <h4>Product</h4>
               <button
+                className="footer-link-btn"
                 onClick={() => scrollToSection("features")}
-                style={{
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  color: "inherit",
-                  textAlign: "left",
-                }}
               >
                 Features
               </button>
               <button
+                className="footer-link-btn"
                 onClick={() => scrollToSection("pricing")}
-                style={{
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  color: "inherit",
-                  textAlign: "left",
-                }}
               >
                 Pricing
               </button>
@@ -570,26 +505,14 @@ export default function Landing() {
             <div className="footer-section">
               <h4>Legal</h4>
               <button
+                className="footer-link-btn"
                 onClick={() => navigate("/privacy")}
-                style={{
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  color: "inherit",
-                  textAlign: "left",
-                }}
               >
                 Privacy Policy
               </button>
               <button
+                className="footer-link-btn"
                 onClick={() => navigate("/terms")}
-                style={{
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  color: "inherit",
-                  textAlign: "left",
-                }}
               >
                 Terms of Service
               </button>

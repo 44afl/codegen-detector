@@ -129,11 +129,13 @@
     flex: 1;
     overflow-y: auto;
     scroll-behavior: smooth;
+    padding-top: 1rem;
   }
   
   .messages {
+    margin-top: 50px;
     max-width: 896px;
-    margin: 0 auto;
+    margin-left: auto; margin-right: auto;
     padding: 2rem 1rem;
     display: flex;
     flex-direction: column;

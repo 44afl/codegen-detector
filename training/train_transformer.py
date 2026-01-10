@@ -27,33 +27,29 @@ if __name__ == "__main__":
         "n_keywords"
     ]
     
-    print("[TRANSFORMER TRAINING] Extracting features...")
+    print("[TRANSFORMER TRAINING] Preparing text inputs for transformer...")
     X_list = []
     y_list = []
-    
+
     for idx, row in df.iterrows():
         try:
             code = str(row["code"])
             label = int(row["label"])
-            
-            # Process code same way as in prediction
+
+            # Process code same way as in prediction and keep text for tokenizer
             processed = preprocessor.clean(code)
-            features = feature_extractor.extract_features(processed)
-            
-            # Create feature vector in correct order
-            feature_vector = [float(features.get(f, 0)) for f in feature_order]
-            
-            X_list.append(feature_vector)
+
+            X_list.append(processed)
             y_list.append(label)
-            
+
             if (idx + 1) % 100 == 0:
                 print(f"[TRANSFORMER TRAINING] Processed {idx + 1}/{len(df)} samples...")
-                
+
         except Exception as e:
             print(f"[TRANSFORMER TRAINING] Error processing row {idx}: {e}")
             continue
-    
-    X = np.array(X_list, dtype=np.float32)
+
+    X = np.array(X_list, dtype=object)
     y = np.array(y_list, dtype=np.int32)
     
     print(f"[TRANSFORMER TRAINING] Final dataset: X shape={X.shape}, y shape={y.shape}")
@@ -64,17 +60,17 @@ if __name__ == "__main__":
     )
     
     print(f"[TRANSFORMER TRAINING] Train size: {len(X_train)}, Test size: {len(X_test)}")
-    
+
     # Train model
     print("[TRANSFORMER TRAINING] Training model...")
     model = TransformerModel()
-    model.train(X_train, y_train)
+    model.train(list(X_train), list(y_train))
     
     print("[TRANSFORMER TRAINING] Training complete!")
     
     # Evaluate
     print("[TRANSFORMER TRAINING] Evaluating model...")
-    y_pred_proba = model.predict(X_test)
+    y_pred_proba = model.predict(list(X_test))
     y_pred = (y_pred_proba > 0.5).astype(int)
     
     accuracy = accuracy_score(y_test, y_pred)

@@ -99,14 +99,18 @@ def main():
 
     try:
         transformer = TransformerModel().load("data/transformer_model.pkl")
-        N = 500
-        val_small = val.head(N)
-        y_small = y_val[:N]
-        results["transformer"] = evaluate_transformer(transformer, val_small, y_small)
+
+        # ⚠️ Dacă e lent, poți limita la primele N exemple:
+        # N = 500
+        # val_small = val.head(N)
+        # y_small = y_val[:N]
+        # results["transformer"] = evaluate_transformer(transformer, val_small, y_small)
 
         results["transformer"] = evaluate_transformer(transformer, val, y_val)
     except Exception as e:
         print("Could not evaluate transformer:", e)
+
+    # 3) best by F1
     if results:
         best = max(results.items(), key=lambda kv: kv[1]["f1"])
         print("\nBEST by F1:", best[0], best[1])

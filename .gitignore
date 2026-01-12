@@ -5,4 +5,4 @@ data/task_a
 __pycache__/data/transformer_model.pkl
 data/transformer_model.pkl
 data/*.pkl
-bandit-report.json
+bandit-report.jsoncodegen-detector.zip

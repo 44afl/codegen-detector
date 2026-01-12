@@ -8,7 +8,9 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 
 if __name__ == "__main__":
     print("[LSTM TRAINING] Loading dataset...")
-    df = pd.read_parquet("data/task_a_trial.parquet")
+  #  df = pd.read_parquet("data/task_a_trial.parquet")
+
+    df = pd.read_parquet("data/train.parquet")
     df = df.dropna(subset=["code", "label"])
     
     print(f"[LSTM TRAINING] Dataset size: {len(df)} samples")

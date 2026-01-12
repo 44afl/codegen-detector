@@ -6,3 +6,4 @@ __pycache__/data/transformer_model.pkl
 data/transformer_model.pkl
 data/*.pkl
 bandit-report.jsoncodegen-detector.zip
+codegen-detector.zip

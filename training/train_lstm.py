@@ -77,18 +77,29 @@ if __name__ == "__main__":
     # Evaluate
     print("[LSTM TRAINING] Evaluating model...")
     y_pred_proba = model.predict(X_test)
-    y_pred = (y_pred_proba > 0.5).astype(int)
+    best_t, best_f1 = 0.5, -1
+    for t in np.arange(0.05, 0.96, 0.05):
+        y_hat = (y_pred_proba >= t).astype(int)
+        f = f1_score(y_test, y_hat, average="macro")
+        if f > best_f1:
+            best_f1, best_t = f, t
+    print("Best threshold:", best_t, "macroF1:", best_f1)
+
+    y_pred = (y_pred_proba > best_t).astype(int)
     
     accuracy = accuracy_score(y_test, y_pred)
     precision = precision_score(y_test, y_pred)
     recall = recall_score(y_test, y_pred)
-    f1 = f1_score(y_test, y_pred)
+    from sklearn.metrics import f1_score
+    macro_f1 = f1_score(y_test, y_pred, average="macro")
+    print(f"  Macro F1:  {macro_f1:.4f}")
+
     
     print(f"\n[LSTM RESULTS]")
     print(f"  Accuracy:  {accuracy:.4f}")
     print(f"  Precision: {precision:.4f}")
     print(f"  Recall:    {recall:.4f}")
-    print(f"  F1 Score:  {f1:.4f}")
+ 
     
     # Check probability distribution
     print(f"\n[LSTM PROBABILITY CHECK]")

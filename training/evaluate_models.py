@@ -100,7 +100,6 @@ def main():
     try:
         transformer = TransformerModel().load("data/transformer_model.pkl")
 
-        # ⚠️ Dacă e lent, poți limita la primele N exemple:
         # N = 500
         # val_small = val.head(N)
         # y_small = y_val[:N]
@@ -110,7 +109,6 @@ def main():
     except Exception as e:
         print("Could not evaluate transformer:", e)
 
-    # 3) best by F1
     if results:
         best = max(results.items(), key=lambda kv: kv[1]["f1"])
         print("\nBEST by F1:", best[0], best[1])
@@ -118,3 +116,11 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+"""
+adaboost: {'accuracy': 0.89668, 'f1': 0.9032837832777924, 'auc': 0.9417350661799964}
+svm: {'accuracy': 0.87659, 'f1': 0.889414589997939, 'auc': 0.9252001397890812}
+lstm: {'accuracy': 0.943, 'f1': 0.946625215371938, 'auc': 0.9768869627420892}
+
+"""
